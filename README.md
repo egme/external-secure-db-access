@@ -17,11 +17,11 @@ Options like ETL, data lakes, event-sourcing, etc. back then were rejected and t
 - each of the micro-services is responsible for exposing it's own data to the `analytics` DB
   - cross-VPC access is configured via [VPC peering](https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html) in Terraform
   - each service is provided with privileged access to `analytics` DB and on each migration re-establishes FDW link between databases
-- three sensitivity [labels](app/lib/database/data_labeling_config.rb#3) are defined for all data managed by service:
+- three sensitivity [labels](app/lib/database/data_labeling_config.rb#L3) are defined for all data managed by service:
   - `normal` - non-PII and non-secret data only, generally available for all staff
   - `pii` - personally identifyable information
   - `secret` - access tokens, passwords, recovery keys, etc
-- three PG user [roles](app/lib/database/roles_config.rb#7) definced with different data access levels
+- three PG user [roles](app/lib/database/roles_config.rb#L7) definced with different data access levels
   - `service` - full access to data the service is responsible for, provided to service workloads only
   - `looker` - can see only general data fields marked as `normal`
   - `spy` - can see PII, but not secrets. Only a few people from compliance team should have this level of access
@@ -31,8 +31,8 @@ Options like ETL, data lakes, event-sourcing, etc. back then were rejected and t
   - data in defined views should also respect labeling and prevent exposing sensitive fields externally
 
 The only dependencies for this solution are:
-- External `analytics` database privileged access provided via [ANALYTICS_DSN](app/lib/database/analytics.rb#72) ENV variable. VPC peering config is out of scope of this example and is purely a Terraform magic.
-- Pre-configured additional [looker](app/lib/database/analytics.rb#43) role in micro-service's Postgres DB, managed via Terraform again
+- External `analytics` database privileged access provided via [ANALYTICS_DSN](app/lib/database/analytics.rb#L72) ENV variable. VPC peering config is out of scope of this example and is purely a Terraform magic.
+- Pre-configured additional [looker](app/lib/database/analytics.rb#L43) role in micro-service's Postgres DB, managed via Terraform again
 
 The rest is based on explicit labeling of data columns (see [DatalabelingConfig::LABELED_COLUMNS](app/lib/database/data_labeling_config.rb) and auto-discovery.
 
@@ -40,9 +40,9 @@ Since each service release is driven by CI/CD pipeline and migration step is req
 
 ### Goals achieved
 
-1. Declarative [definition](app/lib/database/data_labeling_config.rb#3) of sensitivity labels per each DB column
-2. Declarative [definition](app/lib/database/views.rb#5) and [version control](app/lib/database/views.rb#6) of analytics views 
-4. [Auto-discovery](app/lib/database/data_labeling_config.rb#64) applies sensitivity labels to derived views based on the original tables/columns
+1. Declarative [definition](app/lib/database/data_labeling_config.rb#L3) of sensitivity labels per each DB column
+2. Declarative [definition](app/lib/database/views.rb#L5) and [version control](app/lib/database/views.rb#L6) of analytics views 
+4. [Auto-discovery](app/lib/database/data_labeling_config.rb#L64) applies sensitivity labels to derived views based on the original tables/columns
 2. Full labeling coverage of data is [enforced](test/lib/database/data_labeling_config_test.rb) with unit tests
 3. Full [automation](lib/tasks/db.rake) of complex setup
 5. Multi-level security and data protection
